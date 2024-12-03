@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'sign_up_page.dart';
 import 'password_reset_page.dart';
+import 'home_page.dart';  // HomePage importu
+import 'admin_home_page.dart'; // AdminHomePage importu
 
 class SignInPage extends StatefulWidget {
   @override
@@ -30,7 +33,23 @@ class _SignInPageState extends State<SignInPage> {
           email: _email,
           password: _password,
         );
-        Navigator.pushReplacementNamed(context, '/home');
+
+        // Giriş yaptıktan sonra kullanıcı rolünü kontrol et ve uygun sayfaya yönlendir
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          String role = await _getUserRole(user.uid);
+          if (role == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminHomePage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          }
+        }
       } on FirebaseAuthException catch (e) {
         String message;
         if (e.code == 'user-not-found') {
@@ -48,7 +67,21 @@ class _SignInPageState extends State<SignInPage> {
       }
     }
   }
-  
+
+  Future<String> _getUserRole(String userId) async {
+    try {
+      // Kullanıcı rolünü Firestore'dan al
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        return userDoc['role'] ?? 'unknown';
+      }
+      return 'unknown';
+    } catch (e) {
+      print('Error fetching user role: $e');
+      return 'unknown';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

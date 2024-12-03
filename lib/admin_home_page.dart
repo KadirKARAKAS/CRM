@@ -2,31 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AdminHomePage extends StatelessWidget {
+class AdminHomePage extends StatefulWidget {
+  @override
+  _AdminHomePageState createState() => _AdminHomePageState();
+}
+
+class _AdminHomePageState extends State<AdminHomePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // Kullanıcıları Firestore'dan çekmek için metod
   Future<List<Map<String, dynamic>>> _getUsers() async {
-    // 'users' koleksiyonundaki tüm kullanıcıları alıyoruz
-    QuerySnapshot snapshot = await _firestore.collection('users').get();
-    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    try {
+      QuerySnapshot snapshot = await _firestore.collection('users').get();
+      return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    } catch (e) {
+      print("Hata: $e");
+      return [];
+    }
   }
 
+  // Kullanıcıyı silme işlemi
   Future<void> _deleteUser(String userId) async {
-    // Kullanıcıyı silme işlemi
-    await _firestore.collection('users').doc(userId).delete();
+    try {
+      await _firestore.collection('users').doc(userId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kullanıcı başarıyla silindi.')));
+    } catch (e) {
+      print("Kullanıcı silinirken hata oluştu: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kullanıcı silinirken hata oluştu: $e')));
+    }
   }
 
+  // Kullanıcının rolünü güncelleme işlemi
   Future<void> _updateUserRole(String userId, String newRole) async {
-    // Kullanıcının rolünü güncelleme işlemi
-    await _firestore.collection('users').doc(userId).update({'role': newRole});
+    try {
+      await _firestore.collection('users').doc(userId).update({'role': newRole});
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rol başarıyla güncellendi')));
+    } catch (e) {
+      print('Rol güncellenirken hata oluştu: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rol güncellenirken hata oluştu: $e')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Admin Ana Sayfa')),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _getUsers(),
+      body: FutureBuilder<List<Map<String, dynamic>>>( 
+        future: _getUsers(), // Kullanıcıları çekiyoruz
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -45,7 +67,9 @@ class AdminHomePage extends StatelessWidget {
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               var user = snapshot.data![index];
-              String userId = user['uid'];
+
+              // null kontrolü ekleniyor
+              String userId = user['uid'] ?? 'Unknown UID';
               String userName = user['name'] ?? 'Kullanıcı adı yok';
               String userEmail = user['email'] ?? 'Email yok';
               String userRole = user['role'] ?? 'unknown';
@@ -65,15 +89,18 @@ class AdminHomePage extends StatelessWidget {
                           builder: (context) => RoleDialog(userRole: userRole),
                         );
                         if (newRole != null && newRole != userRole) {
-                          _updateUserRole(userId, newRole);
+                          await _updateUserRole(userId, newRole);
                         }
                       },
                     ),
                     IconButton(
                       icon: Icon(Icons.delete),
-                      onPressed: () {
+                      onPressed: () async {
                         // Kullanıcıyı silme işlemi
-                        _deleteUser(userId);
+                        await _deleteUser(userId);
+                        setState(() {
+                          // Kullanıcıyı silip listeyi güncelliyoruz
+                        });
                       },
                     ),
                   ],
@@ -87,22 +114,36 @@ class AdminHomePage extends StatelessWidget {
   }
 }
 
-class RoleDialog extends StatelessWidget {
+// Kullanıcı rolünü değiştirmek için kullanılan dialog
+class RoleDialog extends StatefulWidget {
   final String userRole;
 
   RoleDialog({required this.userRole});
 
   @override
-  Widget build(BuildContext context) {
-    String selectedRole = userRole;
+  _RoleDialogState createState() => _RoleDialogState();
+}
 
+class _RoleDialogState extends State<RoleDialog> {
+  late String selectedRole;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedRole = widget.userRole; // Başlangıçta mevcut rol seçili olsun
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('Rol Seçin'),
       content: DropdownButton<String>(
         value: selectedRole,
         onChanged: (String? newValue) {
           if (newValue != null) {
-            selectedRole = newValue;
+            setState(() {
+              selectedRole = newValue;
+            });
           }
         },
         items: <String>['admin', 'personnel', 'user']
