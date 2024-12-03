@@ -4,12 +4,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'sign_up_page.dart';
 import 'password_reset_page.dart';
 
-class RegisterPage extends StatefulWidget {
+class SignInPage extends StatefulWidget {
   @override
-  _RegisterPageState createState() => _RegisterPageState();
+  _SignInPageState createState() => _SignInPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   
   String _email = '';

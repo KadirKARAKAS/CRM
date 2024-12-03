@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
 import 'home_page.dart';
-import 'register_page.dart'; // Kayıt ekranını bu şekilde ekleyin.
+import 'sign_in_page.dart'; // Kayıt ekranını bu şekilde ekleyin.
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       ),
       home: AuthenticationWrapper(),
       routes: {
-        '/signin': (context) => RegisterPage(),
+        '/signin': (context) => SignInPage(),
         '/home': (context) => HomePage(),
         // Diğer sayfalar için rotalar ekleyebilirsiniz
       },
@@ -47,7 +47,7 @@ class AuthenticationWrapper extends StatelessWidget {
           if (snapshot.hasData) {
             return HomePage();
           } else {
-            return RegisterPage();
+            return SignInPage();
           }
         }
         return Scaffold(

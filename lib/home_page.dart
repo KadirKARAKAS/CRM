@@ -1,4 +1,4 @@
-import 'package:crm/register_page.dart';
+import 'package:crm/sign_in_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -19,7 +19,7 @@ class HomePage extends StatelessWidget {
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacement(
                 context, 
-                MaterialPageRoute(builder: (context) => RegisterPage())
+                MaterialPageRoute(builder: (context) => SignInPage())
               );
             },
           )
