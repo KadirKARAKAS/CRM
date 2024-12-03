@@ -13,54 +13,56 @@ class _SignUpPageState extends State<SignUpPage> {
   String _email = '';
   String _password = '';
   bool _isLoading = false;
+Future<void> _signUp() async {
+  if (_formKey.currentState!.validate()) {
+    _formKey.currentState!.save();
 
-  Future<void> _signUp() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
 
-      setState(() {
-        _isLoading = true;
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _email,
+        password: _password,
+      );
+
+      String userId = userCredential.user!.uid;
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId) 
+          .set({
+        'uid': userId,
+        'email': _email,
+        'created_at': DateTime.now(),
+        'role': 'user',
       });
 
-      try {
-        // Kullanıcıyı Firebase Authentication'a kaydet
-        UserCredential userCredential =
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        );
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid) 
-            .set({
-          'email': _email, 
-          'created_at': DateTime.now(),
-          'role': 'user',
-        });
-
-        // Başarılı mesajı göster
-        Fluttertoast.showToast(msg: 'Kayıt başarılı!');
-        Navigator.pop(context);
-      } on FirebaseAuthException catch (e) {
-        String message;
-        if (e.code == 'email-already-in-use') {
-          message = 'Bu e-posta zaten kullanılıyor.';
-        } else if (e.code == 'weak-password') {
-          message = 'Şifre çok zayıf.';
-        } else {
-          message = 'Hata: ${e.message}';
-        }
-        Fluttertoast.showToast(msg: message);
-      } catch (e) {
-        Fluttertoast.showToast(msg: 'Bir hata oluştu: $e');
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
+      // Başarılı mesajı göster
+      Fluttertoast.showToast(msg: 'Kayıt başarılı!');
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'email-already-in-use') {
+        message = 'Bu e-posta zaten kullanılıyor.';
+      } else if (e.code == 'weak-password') {
+        message = 'Şifre çok zayıf.';
+      } else {
+        message = 'Hata: ${e.message}';
       }
+      Fluttertoast.showToast(msg: message);
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Bir hata oluştu: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
