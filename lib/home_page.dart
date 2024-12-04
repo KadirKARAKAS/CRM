@@ -1,14 +1,18 @@
-import 'package:crm/sign_in_page.dart';
+import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:crm/sign_in_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final User? user = FirebaseAuth.instance.currentUser;
-  
+
   @override
   Widget build(BuildContext context) {
-    String email = user?.email ?? 'Kullanıcı';
-    
     return Scaffold(
       appBar: AppBar(
         title: Text('Ana Sayfa'),
@@ -16,17 +20,19 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
-              await FirebaseAuth.instance.signOut();
+              await FirebaseAuth.instance.signOut(); // Firebase çıkış işlemi
               Navigator.pushReplacement(
-                context, 
-                MaterialPageRoute(builder: (context) => SignInPage())
+                context,
+                MaterialPageRoute(builder: (context) => SignUpPage()), // Login sayfasına yönlendir
               );
             },
           )
         ],
       ),
       body: Center(
-        child: Text('Hoşgeldiniz, $email!'),
+        child: user == null
+            ? CircularProgressIndicator() // Kullanıcı girişi yapılmamışsa yükleme animasyonu göster
+            : Text('Hoşgeldiniz, ${user?.email ?? 'Kullanıcı'}!'),
       ),
     );
   }

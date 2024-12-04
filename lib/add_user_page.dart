@@ -23,7 +23,6 @@ Future<void> _addUser() async {
   }
 
   try {
-    // Firebase Authentication'da kullanıcı oluşturma
     UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: "defaultPassword123", // Varsayılan bir şifre belirleniyor
@@ -31,7 +30,6 @@ Future<void> _addUser() async {
 
     String userId = userCredential.user!.uid;
 
-    // Firestore'da kullanıcıyı kaydetme
     await _firestore.collection('users').doc(userId).set({
       'uid': userId,
       'email': email,

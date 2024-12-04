@@ -1,26 +1,32 @@
 import 'package:crm/firebase_options.dart';
+import 'package:crm/home_page.dart';
+import 'package:crm/model/user_provider.dart';
+import 'package:crm/sign_in_page.dart';
+import 'package:crm/sign_up_page.dart';
+import 'package:firebase_core/firebase_core.dart';  // Firebase başlatma için import
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'sign_in_page.dart'; // SignInPage'inizi ekleyin
+import 'package:provider/provider.dart';
 
+import 'admin_home_page.dart';
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // Firebase'i başlatıyoruz
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: SignInPage(),));
-}
+  WidgetsFlutterBinding.ensureInitialized(); 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); 
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Firebase Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/login',
+        routes: {
+          '/login': (context) => SignUpPage(),
+          '/home': (context) => HomePage(),
+
+    
+        },
       ),
-      home: SignInPage(), // Başlangıç sayfası olarak SignInPage
-    );
-  }
+    ),
+  );
 }

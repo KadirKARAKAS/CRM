@@ -1,7 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crm/password_reset_page.dart';
+import 'package:crm/sign_in_page.dart';
+import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:crm/admin_home_page.dart';
+import 'package:crm/personel_page.dart'; // Personel sayfası
+import 'package:crm/home_page.dart'; // HomePage'e yönlendirme
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -9,111 +14,133 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
-  bool _isLoading = false;
-Future<void> _signUp() async {
-  if (_formKey.currentState!.validate()) {
-    _formKey.currentState!.save();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _auth = FirebaseAuth.instance;
 
-    setState(() {
-      _isLoading = true;
-    });
-
+  // Giriş işlemi
+  Future<void> _signIn() async {
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _email,
-        password: _password,
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
       );
 
-      String userId = userCredential.user!.uid;
+      // Giriş başarılıysa
+      if (userCredential.user != null) {
+        String uid = userCredential.user!.uid;
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId) 
-          .set({
-        'uid': userId,
-        'email': _email,
-        'created_at': DateTime.now(),
-        'role': 'user',
-      });
+        // Kullanıcı rolünü Firestore'dan al
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        String role = userDoc['role'];
 
-      // Başarılı mesajı göster
-      Fluttertoast.showToast(msg: 'Kayıt başarılı!');
-      Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      String message;
-      if (e.code == 'email-already-in-use') {
-        message = 'Bu e-posta zaten kullanılıyor.';
-      } else if (e.code == 'weak-password') {
-        message = 'Şifre çok zayıf.';
-      } else {
-        message = 'Hata: ${e.message}';
+        print("Kullanıcı rolü: $role"); // Hata ayıklamak için log ekleyin
+
+        // Rolüne göre doğru sayfaya yönlendir
+        if (role == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AdminHomePage()), // Admin sayfasına yönlendir
+          );
+        } else if (role == 'personnel') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => PersonelPage()), // Personel sayfasına yönlendir
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()), // User sayfasına yönlendir (HomePage)
+          );
+        }
       }
-      Fluttertoast.showToast(msg: message);
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Bir hata oluştu: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      print("Giriş hatası: $e"); // Hata mesajını loglara yazdırın
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Giriş yapılırken bir hata oluştu: $e')),
+      );
     }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Kayıt Ol'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      decoration: InputDecoration(labelText: 'E-posta'),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'E-posta boş olamaz';
-                        }
-                        if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                          return 'Geçerli bir e-posta girin';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _email = value!.trim(),
-                    ),
-                    TextFormField(
-                      decoration: InputDecoration(labelText: 'Şifre'),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Şifre boş olamaz';
-                        }
-                        if (value.length < 6) {
-                          return 'Şifre en az 6 karakter olmalı';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _password = value!.trim(),
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _signUp,
-                      child: Text('Kayıt Ol'),
-                    ),
-                  ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo veya Başlık
+                Text(
+                  'Hoşgeldiniz',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
-              ),
+                SizedBox(height: 40),
+                // E-posta alanı
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    hintText: 'E-posta adresiniz',
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
+                ),
+                SizedBox(height: 20),
+                // Şifre alanı
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: 'Şifreniz',
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
+                ),
+                SizedBox(height: 20),
+                // Giriş butonu
+                ElevatedButton(
+                  onPressed: _signIn,
+                  child: Text('Giriş Yap'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 50),
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                // Kayıt olma linki
+                TextButton(
+                  onPressed: () {
+                    // Kayıt olma sayfasına yönlendirme
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignInPage()),
+                    );
+                  },
+                  child: Text('Hesabınız yok mu? Kayıt Olun'),
+                ),
+                 TextButton(
+                  onPressed: () {
+                    // Kayıt olma sayfasına yönlendirme
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PasswordResetPage()),
+                    );
+                  },
+                  child: Text('Şifremi unuttum!'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

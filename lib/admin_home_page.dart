@@ -1,7 +1,11 @@
-import 'package:crm/add_user_page.dart';
+import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:crm/sign_in_page.dart';
+import 'package:crm/model/user_model.dart';
+import 'package:crm/model/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class AdminHomePage extends StatefulWidget {
   @override
@@ -9,133 +13,104 @@ class AdminHomePage extends StatefulWidget {
 }
 
 class _AdminHomePageState extends State<AdminHomePage> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // Kullanıcıları Firestore'dan çekmek için metod
-  Future<List<Map<String, dynamic>>> _getUsers() async {
-    try {
-      QuerySnapshot snapshot = await _firestore.collection('users').get();
-      return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-    } catch (e) {
-      print("Hata: $e");
-      return [];
-    }
-  }
-
-  // Kullanıcıyı silme işlemi
-  Future<void> _deleteUser(String userId) async {
-    try {
-      await _firestore.collection('users').doc(userId).delete();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kullanıcı başarıyla silindi.')));
-    } catch (e) {
-      print("Kullanıcı silinirken hata oluştu: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kullanıcı silinirken hata oluştu: $e')));
-    }
-  }
-
-  // Kullanıcının rolünü güncelleme işlemi
-  Future<void> _updateUserRole(String userId, String newRole) async {
-    try {
-      await _firestore.collection('users').doc(userId).update({'role': newRole});
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rol başarıyla güncellendi')));
-    } catch (e) {
-      print('Rol güncellenirken hata oluştu: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rol güncellenirken hata oluştu: $e')));
-    }
-  }
-
-  // Çıkış işlemi
-  void _logout() async {
-    try {
-      await _auth.signOut();
-      Navigator.pushReplacementNamed(context, '/login'); // Giriş sayfasına yönlendirme
-    } catch (e) {
-      print('Çıkış yaparken hata oluştu: $e');
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Kullanıcıları başlatmak için
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).fetchUsers();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin Ana Sayfa'),
+        title: Text('Admin Paneli'),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-Navigator.push(
-  context,
-  MaterialPageRoute(builder: (context) => AddUserPage()),
-);
-            },
-          ),
-          IconButton(
             icon: Icon(Icons.logout),
-            onPressed: _logout, // Çıkış işlemi
+            onPressed: () async {
+              try {
+                await FirebaseAuth.instance.signOut();  // Firebase çıkış işlemi
+                Navigator.pushReplacement(
+                  context, 
+                  MaterialPageRoute(builder: (context) => SignUpPage())  // Login sayfasına yönlendir
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Çıkış yapılırken bir hata oluştu: $e'))
+                );
+              }
+            },
           ),
         ],
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _getUsers(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          if (userProvider.users.isEmpty) {
             return Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Bir hata oluştu.'));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Kullanıcı bulunamadı.'));
-          }
-
-          // Kullanıcı listesi
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              var user = snapshot.data![index];
-
-              // null kontrolü ekleniyor
-              String userId = user['uid'] ?? 'Unknown UID';
-              String userName = user['name'] ?? 'Kullanıcı adı yok';
-              String userEmail = user['email'] ?? 'Email yok';
-              String userRole = user['role'] ?? 'unknown';
-
-              return ListTile(
-                title: Text(userName),
-                subtitle: Text('$userEmail\nRol: $userRole'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () async {
-                        // Rol değiştirme işlemi
-                        String? newRole = await showDialog<String>(
-                          context: context,
-                          builder: (context) => RoleDialog(userRole: userRole),
-                        );
-                        if (newRole != null && newRole != userRole) {
-                          await _updateUserRole(userId, newRole);
-                        }
-                      },
+          return SingleChildScrollView(  // Kaydırılabilir yapı
+            padding: const EdgeInsets.all(16.0),
+            child: ListView.builder(
+              shrinkWrap: true,  // Yükseklik konusunda sınırlama
+              physics: NeverScrollableScrollPhysics(), // Scroll'u devre dışı bırak
+              itemCount: userProvider.users.length,
+              itemBuilder: (context, index) {
+                UserModel user = userProvider.users[index];
+            
+                return Card(
+                  color: Colors.blue[50],
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                    title: Text(user.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Email ve Role bilgilerini tam sol tarafa hizaladık
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Text('Email: ${user.email}', style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w400)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text('Rol: ${user.role}', style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w400)),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () async {
-                        // Kullanıcıyı silme işlemi
-                        await _deleteUser(userId);
-                        setState(() {
-                          // Kullanıcıyı silip listeyi güncelliyoruz
-                        });
-                      },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () async {
+                            String? newRole = await showDialog<String>(
+                              context: context,
+                              builder: (context) => RoleDialog(userRole: user.role ?? 'user'),
+                            );
+                            if (newRole != null && newRole != user.role) {
+                              userProvider.updateUserRole(user.uid, newRole);
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            userProvider.deleteUser(user.uid);
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            },
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -143,7 +118,6 @@ Navigator.push(
   }
 }
 
-// Kullanıcı rolünü değiştirmek için kullanılan dialog
 class RoleDialog extends StatefulWidget {
   final String userRole;
 
@@ -159,7 +133,7 @@ class _RoleDialogState extends State<RoleDialog> {
   @override
   void initState() {
     super.initState();
-    selectedRole = widget.userRole; // Başlangıçta mevcut rol seçili olsun
+    selectedRole = widget.userRole;
   }
 
   @override
@@ -167,38 +141,29 @@ class _RoleDialogState extends State<RoleDialog> {
     return AlertDialog(
       title: Text('Rol Seçin'),
       content: DropdownButton<String>(
-  value: <String>['admin', 'personnel', 'user'].contains(selectedRole) 
-      ? selectedRole 
-      : 'user', // Varsayılan bir değer belirtiyoruz
-  onChanged: (String? newValue) {
-    if (newValue != null) {
-      setState(() {
-        selectedRole = newValue;
-      });
-    }
-  },
-  items: <String>['admin', 'personnel', 'user']
-      .map<DropdownMenuItem<String>>((String value) {
-    return DropdownMenuItem<String>(
-      value: value,
-      child: Text(value),
-    );
-  }).toList(),
-),
-
-
-      actions: <Widget>[
+        value: selectedRole,
+        onChanged: (String? newValue) {
+          if (newValue != null) {
+            setState(() {
+              selectedRole = newValue;
+            });
+          }
+        },
+        items: <String>['admin', 'personnel', 'user']
+            .map((role) => DropdownMenuItem(
+                  value: role,
+                  child: Text(role),
+                ))
+            .toList(),
+      ),
+      actions: [
         TextButton(
           child: Text('İptal'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
           child: Text('Kaydet'),
-          onPressed: () {
-            Navigator.of(context).pop(selectedRole);
-          },
+          onPressed: () => Navigator.of(context).pop(selectedRole),
         ),
       ],
     );
