@@ -1,4 +1,4 @@
-import 'package:crm/admin_home_page.dart';
+import 'package:crm/Admin/admin_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -15,68 +15,77 @@ class _AddUserPageState extends State<AddUserPage> {
   final TextEditingController _emailController = TextEditingController();
   String _selectedRole = 'uye';
 
-Future<void> _addUser() async {
-  
-  String email = _emailController.text.trim();
+  Future<void> _addUser() async {
+    String email = _emailController.text.trim();
 
-  if (email.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('E-posta adresi boş olamaz.')),
-    );
-   
-    return;
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('E-posta adresi boş olamaz.')),
+      );
+
+      return;
+    }
+
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: "123456",
+      );
+
+      String userId = userCredential.user!.uid;
+
+      Provider.of<UserProvider>(context, listen: false).addUser(UserModel(
+        uid: userId,
+        email: email,
+        role: _selectedRole,
+        age: 0,
+        name: email.split('@')[0],
+      ));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kullanıcı başarıyla eklendi.')),
+      );
+
+      _emailController.clear();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AdminHomePage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kullanıcı eklerken hata oluştu: $e')),
+      );
+    }
   }
-
-  try {
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: "123456",
-    );
-
-   String userId = userCredential.user!.uid;
-
-    Provider.of<UserProvider>(context, listen: false).addUser(UserModel(
-      uid: userId,
-      email: email,
-      role: _selectedRole,
-     name: email.split('@')[0],
-    ));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Kullanıcı başarıyla eklendi.')),
-    );
-
-    _emailController.clear();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => AdminHomePage()),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Kullanıcı eklerken hata oluştu: $e')),
-    );
-
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Yeni Kullanıcı Ekle',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
         ),
-        backgroundColor: Colors.blueAccent, 
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => AdminHomePage()),
+              (Route<dynamic> route) => false,
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('E-posta adresi:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text('E-posta adresi:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             SizedBox(height: 8),
             TextField(
               controller: _emailController,
@@ -92,13 +101,12 @@ Future<void> _addUser() async {
               ),
             ),
             SizedBox(height: 16),
-
-            Text('Rol Seç:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text('Rol Seç:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             SizedBox(height: 8),
-
             Container(
-              width: double.infinity, 
-              padding: EdgeInsets.symmetric(horizontal: 8), 
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.blueAccent, width: 1),
@@ -112,7 +120,8 @@ Future<void> _addUser() async {
                             padding: const EdgeInsets.symmetric(vertical: 12.0),
                             child: Text(
                               role.toUpperCase(),
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
                             ),
                           ),
                         ))
@@ -122,15 +131,18 @@ Future<void> _addUser() async {
                     _selectedRole = value!;
                   });
                 },
-                isExpanded: true, 
+                isExpanded: true,
                 underline: SizedBox(),
-                icon: Icon(Icons.arrow_drop_down_circle, color: Colors.blueAccent),
+                icon: Icon(Icons.arrow_drop_down_circle,
+                    color: Colors.blueAccent),
                 iconSize: 30,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.blueAccent),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blueAccent),
               ),
             ),
             SizedBox(height: 16),
-
             Center(
               child: ElevatedButton(
                 onPressed: _addUser,
@@ -139,7 +151,8 @@ Future<void> _addUser() async {
                   style: TextStyle(fontSize: 16),
                 ),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 40), backgroundColor: Colors.blueAccent,
+                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 40),
+                  backgroundColor: Colors.blueAccent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

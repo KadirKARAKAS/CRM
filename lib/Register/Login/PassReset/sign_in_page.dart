@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crm/messaging_services.dart';
-import 'package:crm/password_reset_page.dart';
-import 'package:crm/sign_up_page.dart';
+import 'package:crm/Register/Login/PassReset/password_reset_page.dart';
+import 'package:crm/Register/Login/PassReset/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:crm/admin_home_page.dart';
-import 'package:crm/personel_page.dart'; 
+import 'package:crm/Admin/admin_home_page.dart';
+import 'package:crm/Personel/personel_page.dart'; 
 import 'package:crm/home_page.dart'; 
 
 class SignInPage extends StatefulWidget {

@@ -1,6 +1,5 @@
-
 import 'package:crm/messaging_services.dart';
-import 'package:crm/sign_in_page.dart';
+import 'package:crm/Register/Login/PassReset/sign_in_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,10 +15,6 @@ class _SignUpPageState extends State<SignUpPage> {
   String _email = '';
   String _password = '';
   bool _isLoading = false;
-
-
-
-
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
@@ -37,28 +32,23 @@ class _SignUpPageState extends State<SignUpPage> {
         );
 
         String userId = userCredential.user!.uid;
-String? notificationToken =
-        await MessagingServices().getNotificationToken();
-    
+        String? notificationToken =
+            await MessagingServices().getNotificationToken();
 
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .set({
+        await FirebaseFirestore.instance.collection('users').doc(userId).set({
           'uid': userId,
           'email': _email,
           'created_at': DateTime.now(),
-          'role': 'user', 
+          'role': 'user',
           "name": _email.split('@')[0],
           "notificationToken": notificationToken,
-
+          "age": 0,
         });
 
         Fluttertoast.showToast(msg: 'Kayıt başarılı!');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SignInPage()), 
+          MaterialPageRoute(builder: (context) => SignInPage()),
         );
       } on FirebaseAuthException catch (e) {
         String message;
@@ -83,7 +73,6 @@ String? notificationToken =
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -94,7 +83,7 @@ String? notificationToken =
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                       const Text(
+                        const Text(
                           'Kayıt Ol',
                           style: TextStyle(
                             fontSize: 32,
@@ -102,7 +91,7 @@ String? notificationToken =
                             color: Colors.black,
                           ),
                         ),
-                       const SizedBox(height: 40),
+                        const SizedBox(height: 40),
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'E-posta',
@@ -111,7 +100,8 @@ String? notificationToken =
                             border: OutlineInputBorder(),
                             filled: true,
                             fillColor: Colors.grey[200],
-                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 16),
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
@@ -134,7 +124,8 @@ String? notificationToken =
                             border: OutlineInputBorder(),
                             filled: true,
                             fillColor: Colors.grey[200],
-                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 16),
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -151,7 +142,10 @@ String? notificationToken =
                         SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: _signUp,
-                          child: Text('Kayıt Ol',style: TextStyle(color: Colors.black),),
+                          child: Text(
+                            'Kayıt Ol',
+                            style: TextStyle(color: Colors.black),
+                          ),
                           style: ElevatedButton.styleFrom(
                             minimumSize: Size(double.infinity, 50),
                             backgroundColor: Colors.blueAccent,
