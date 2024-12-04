@@ -1,6 +1,7 @@
+import 'package:crm/add_user_page.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AdminHomePage extends StatefulWidget {
   @override
@@ -9,6 +10,7 @@ class AdminHomePage extends StatefulWidget {
 
 class _AdminHomePageState extends State<AdminHomePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Kullanıcıları Firestore'dan çekmek için metod
   Future<List<Map<String, dynamic>>> _getUsers() async {
@@ -43,12 +45,39 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
+  // Çıkış işlemi
+  void _logout() async {
+    try {
+      await _auth.signOut();
+      Navigator.pushReplacementNamed(context, '/login'); // Giriş sayfasına yönlendirme
+    } catch (e) {
+      print('Çıkış yaparken hata oluştu: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Admin Ana Sayfa')),
-      body: FutureBuilder<List<Map<String, dynamic>>>( 
-        future: _getUsers(), // Kullanıcıları çekiyoruz
+      appBar: AppBar(
+        title: Text('Admin Ana Sayfa'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => AddUserPage()),
+);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _logout, // Çıkış işlemi
+          ),
+        ],
+      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _getUsers(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -138,22 +167,26 @@ class _RoleDialogState extends State<RoleDialog> {
     return AlertDialog(
       title: Text('Rol Seçin'),
       content: DropdownButton<String>(
-        value: selectedRole,
-        onChanged: (String? newValue) {
-          if (newValue != null) {
-            setState(() {
-              selectedRole = newValue;
-            });
-          }
-        },
-        items: <String>['admin', 'personnel', 'user']
-            .map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-      ),
+  value: <String>['admin', 'personnel', 'user'].contains(selectedRole) 
+      ? selectedRole 
+      : 'user', // Varsayılan bir değer belirtiyoruz
+  onChanged: (String? newValue) {
+    if (newValue != null) {
+      setState(() {
+        selectedRole = newValue;
+      });
+    }
+  },
+  items: <String>['admin', 'personnel', 'user']
+      .map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList(),
+),
+
+
       actions: <Widget>[
         TextButton(
           child: Text('İptal'),

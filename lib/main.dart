@@ -7,7 +7,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Firebase'i başlatıyoruz
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(MyApp());
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: SignInPage(),));
 }
 
 class MyApp extends StatelessWidget {

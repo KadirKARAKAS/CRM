@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AddUserPage extends StatefulWidget {
   @override
@@ -7,39 +8,52 @@ class AddUserPage extends StatefulWidget {
 }
 
 class _AddUserPageState extends State<AddUserPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _emailController = TextEditingController();
   String _selectedRole = 'uye';
+Future<void> _addUser() async {
+  String email = _emailController.text.trim();
 
-  Future<void> _addUser() async {
-    String email = _emailController.text.trim();
-
-    if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('E-posta adresi boş olamaz.')),
-      );
-      return;
-    }
-
-    try {
-      // Firestore'da kullanıcı ekleme işlemi
-      await _firestore.collection('users').add({
-        'email': email,
-        'role': _selectedRole,
-        'created_at': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kullanıcı başarıyla eklendi.')),
-      );
-
-      _emailController.clear();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kullanıcı eklerken hata oluştu.')),
-      );
-    }
+  if (email.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('E-posta adresi boş olamaz.')),
+    );
+    return;
   }
+
+  try {
+    // Firebase Authentication'da kullanıcı oluşturma
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: "defaultPassword123", // Varsayılan bir şifre belirleniyor
+    );
+
+    String userId = userCredential.user!.uid;
+
+    // Firestore'da kullanıcıyı kaydetme
+    await _firestore.collection('users').doc(userId).set({
+      'uid': userId,
+      'email': email,
+      'created_at': FieldValue.serverTimestamp(),
+      'role': _selectedRole,
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Kullanıcı başarıyla eklendi.')),
+    );
+
+    _emailController.clear();
+    setState(() {
+          Navigator.pop(context, true); 
+
+    });
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Kullanıcı eklerken hata oluştu: $e')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
