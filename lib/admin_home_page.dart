@@ -1,8 +1,7 @@
+import 'package:crm/add_user_page.dart';
 import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:crm/sign_in_page.dart';
 import 'package:crm/model/user_model.dart';
 import 'package:crm/model/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -28,14 +27,18 @@ class _AdminHomePageState extends State<AdminHomePage> {
       appBar: AppBar(
         title: Text('Admin Paneli'),
         actions: [
+          IconButton(onPressed: () {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AddUserPage(),));
+
+          }, icon: Icon(Icons.add,size: 26,)),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
               try {
-                await FirebaseAuth.instance.signOut();  // Firebase çıkış işlemi
+                await FirebaseAuth.instance.signOut();  
                 Navigator.pushReplacement(
                   context, 
-                  MaterialPageRoute(builder: (context) => SignUpPage())  // Login sayfasına yönlendir
+                  MaterialPageRoute(builder: (context) => SignUpPage())  
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -69,7 +72,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
                   child: ListTile(
                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    title: Text(user.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -116,9 +118,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
     );
   }
-}
-
-class RoleDialog extends StatefulWidget {
+}class RoleDialog extends StatefulWidget {
   final String userRole;
 
   RoleDialog({required this.userRole});
@@ -139,31 +139,94 @@ class _RoleDialogState extends State<RoleDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Rol Seçin'),
-      content: DropdownButton<String>(
-        value: selectedRole,
-        onChanged: (String? newValue) {
-          if (newValue != null) {
-            setState(() {
-              selectedRole = newValue;
-            });
-          }
-        },
-        items: <String>['admin', 'personnel', 'user']
-            .map((role) => DropdownMenuItem(
-                  value: role,
-                  child: Text(role),
-                ))
-            .toList(),
+      title: Text(
+        'Rol Seçin',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.blueAccent,
+        ),
+      ),
+      content: Container(
+        width: double.maxFinite,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Material(
+          color: Colors.white, // Saydam bir arka plan kullan
+          child: InkWell(
+            onTap: () {},
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.blueAccent.withOpacity(0.6),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blueAccent.withOpacity(0.2),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: DropdownButton<String>(
+                  value: selectedRole,
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        selectedRole = newValue;
+                      });
+                    }
+                  },
+                  isExpanded: true,
+                  underline: SizedBox(), // Alt çizgiyi kaldırdık
+                  iconSize: 30, // Ok simgesinin boyutunu artırdık
+                  iconEnabledColor: Colors.white, // Ok simgesinin rengi
+                  style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  items: <String>['admin', 'personel', 'user']
+                      .map((role) => DropdownMenuItem(
+                            value: role,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                              child: Text(
+                                role,
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
       actions: [
         TextButton(
-          child: Text('İptal'),
+          child: Text(
+            'İptal',
+            style: TextStyle(color: Colors.black),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        TextButton(
-          child: Text('Kaydet'),
-          onPressed: () => Navigator.of(context).pop(selectedRole),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop(selectedRole);
+          },
+          child: Text('Kaydet',style: TextStyle(color: Colors.black),),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueAccent,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         ),
       ],
     );

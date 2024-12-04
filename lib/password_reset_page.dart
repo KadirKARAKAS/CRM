@@ -69,9 +69,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                       TextFormField(
                         decoration: InputDecoration(
                           labelText: 'E-posta Adresiniz',
-                          labelStyle: TextStyle(color: Colors.black),
                           hintText: 'E-posta adresinizi girin',
-                          prefixIcon: Icon(Icons.email, color: Colors.black),
+                          prefixIcon: Icon(Icons.email),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

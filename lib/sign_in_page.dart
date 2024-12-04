@@ -1,10 +1,8 @@
+import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:crm/admin_home_page.dart';
-import 'package:crm/personel_page.dart';
-import 'package:crm/sign_in_page.dart'; // Giriş sayfasına yönlendireceğiz
 
 class SignInPage extends StatefulWidget {
   @override
@@ -26,7 +24,6 @@ class _SignInPageState extends State<SignInPage> {
       });
 
       try {
-        // Kullanıcı kaydını Firebase Authentication ile yapıyoruz
         UserCredential userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _email,
@@ -35,7 +32,6 @@ class _SignInPageState extends State<SignInPage> {
 
         String userId = userCredential.user!.uid;
 
-        // Firestore'da kullanıcıyı oluşturuyoruz
         await FirebaseFirestore.instance
             .collection('users')
             .doc(userId)
@@ -43,14 +39,13 @@ class _SignInPageState extends State<SignInPage> {
           'uid': userId,
           'email': _email,
           'created_at': DateTime.now(),
-          'role': 'user', // Varsayılan olarak 'user' rolü atanıyor
+          'role': 'user', 
         });
 
-        // Kullanıcı oluşturulduktan sonra, giriş sayfasına yönlendireceğiz
         Fluttertoast.showToast(msg: 'Kayıt başarılı!');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SignInPage()), // Giriş sayfasına yönlendir
+          MaterialPageRoute(builder: (context) => SignUpPage()), 
         );
       } on FirebaseAuthException catch (e) {
         String message;
@@ -147,7 +142,7 @@ class _SignInPageState extends State<SignInPage> {
                         // Kayıt ol butonu
                         ElevatedButton(
                           onPressed: _signUp,
-                          child: Text('Kayıt Ol'),
+                          child: Text('Kayıt Ol',style: TextStyle(color: Colors.black),),
                           style: ElevatedButton.styleFrom(
                             minimumSize: Size(double.infinity, 50),
                             backgroundColor: Colors.blueAccent,

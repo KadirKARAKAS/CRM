@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crm/password_reset_page.dart';
 import 'package:crm/sign_in_page.dart';
-import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:crm/admin_home_page.dart';
@@ -42,7 +41,7 @@ class _SignUpPageState extends State<SignUpPage> {
             context,
             MaterialPageRoute(builder: (context) => AdminHomePage()), // Admin sayfasına yönlendir
           );
-        } else if (role == 'personnel') {
+        } else if (role == 'personel') {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => PersonelPage()), // Personel sayfasına yönlendir
@@ -57,7 +56,7 @@ class _SignUpPageState extends State<SignUpPage> {
     } catch (e) {
       print("Giriş hatası: $e"); // Hata mesajını loglara yazdırın
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Giriş yapılırken bir hata oluştu: $e')),
+        SnackBar(content: Text('Eksik veya hatalı bilgi!')),
       );
     }
   }
@@ -99,14 +98,14 @@ class _SignUpPageState extends State<SignUpPage> {
                     prefixIcon: Icon(Icons.lock),
                     border: OutlineInputBorder(),
                     filled: true,
-                    fillColor: Colors.grey[200],
+                    fillColor: Colors.grey[200], 
                   ),
                 ),
                 SizedBox(height: 20),
                 // Giriş butonu
                 ElevatedButton(
                   onPressed: _signIn,
-                  child: Text('Giriş Yap'),
+                  child: Text('Giriş Yap',style: TextStyle(color: Colors.black),),
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 50),
                     backgroundColor: Colors.blue,

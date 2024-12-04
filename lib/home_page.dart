@@ -1,7 +1,6 @@
 import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:crm/sign_in_page.dart';
 
 class HomePage extends StatefulWidget {
   @override

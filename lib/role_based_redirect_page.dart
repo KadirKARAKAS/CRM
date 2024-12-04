@@ -1,7 +1,6 @@
 import 'package:crm/admin_home_page.dart';
 import 'package:crm/home_page.dart';
 import 'package:crm/sign_in_page.dart';
-import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

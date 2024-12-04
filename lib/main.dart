@@ -1,13 +1,11 @@
 import 'package:crm/firebase_options.dart';
 import 'package:crm/home_page.dart';
 import 'package:crm/model/user_provider.dart';
-import 'package:crm/sign_in_page.dart';
 import 'package:crm/sign_up_page.dart';
 import 'package:firebase_core/firebase_core.dart';  // Firebase başlatma için import
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'admin_home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); 

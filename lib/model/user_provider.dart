@@ -14,6 +14,7 @@ class UserProvider with ChangeNotifier {
       QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').get();
 
       // Verileri alıp listeye dönüştürme
+      _users = [];
       _users = snapshot.docs
           .map((doc) => UserModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
@@ -28,11 +29,11 @@ class UserProvider with ChangeNotifier {
   // Kullanıcı silme
   Future<void> deleteUser(String userId) async {
     try {
-      // Firestore'dan kullanıcıyı silme
+      // Firestore'dan kullanıcıyı silme 
       await FirebaseFirestore.instance.collection('users').doc(userId).delete();
       
       // Silinen kullanıcıyı liste üzerinden çıkarma
-      _users.removeWhere((user) => user.uid == userId);
+      _users.removeWhere((user) => user.uid == userId);  
 
       // UI'ı güncellemek için notifyListeners() çağırıyoruz
       notifyListeners();
