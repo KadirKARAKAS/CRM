@@ -38,13 +38,13 @@ class PersonelPage extends StatelessWidget {
 
           final users = snapshot.data?.docs ?? [];
           return SingleChildScrollView(
-            scrollDirection: Axis.horizontal, // Yatay kaydırma
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.all(16.0),
             child: DataTable(
               columnSpacing: 16.0,
               headingRowHeight: 56.0,
               dataRowHeight: 56.0,
-              columns: [
+              columns: const [
                 DataColumn(
                     label: Text('Ad',
                         style: TextStyle(fontWeight: FontWeight.bold))),
