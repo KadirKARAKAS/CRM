@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -8,28 +10,24 @@ class PasswordResetPage extends StatefulWidget {
 }
 
 class _PasswordResetPageState extends State<PasswordResetPage> {
-  final _formKey = GlobalKey<FormState>();
-  String _email = '';
   bool _isLoading = false;
+  TextEditingController emailController = TextEditingController();
 
   Future<void> _resetPassword() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
       setState(() {
         _isLoading = true;
       });
 
       try {
-        await FirebaseAuth.instance.sendPasswordResetEmail(email: _email);
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text);
         Fluttertoast.showToast(msg: 'Şifre sıfırlama bağlantısı e-postanıza gönderildi.');
         Navigator.pop(context);
       } on FirebaseAuthException catch (e) {
-        String message;
+        String message = "";
         if (e.code == 'user-not-found') {
           message = 'Bu e-posta ile bir kullanıcı bulunamadı.';
         } else {
-          message = 'Hata: ${e.message}';
+        log(e.code);
         }
         Fluttertoast.showToast(msg: message);
       } finally {
@@ -37,7 +35,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
           _isLoading = false;
         });
       }
-    }
+  
   }
 
   @override
@@ -46,15 +44,14 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
      
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Başlık
-                      Text(
+                    const  Text(
                         'Şifrenizi Sıfırlayın',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -63,10 +60,9 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                           color: Colors.black,
                         ),
                       ),
-                      SizedBox(height: 40),
-                      
-                      // E-posta giriş alanı
-                      TextFormField(
+                    const  SizedBox(height: 40),
+                      TextFormField(   
+                        controller: emailController,
                         decoration: InputDecoration(
                           labelText: 'E-posta Adresiniz',
                           hintText: 'E-posta adresinizi girin',
@@ -87,11 +83,9 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                           }
                           return null;
                         },
-                        onSaved: (value) => _email = value!.trim(),
                       ),
                       SizedBox(height: 30),
 
-                      // Şifre sıfırlama butonu
                       ElevatedButton(
                         onPressed: _resetPassword,
                         child: Text('Şifreyi Sıfırla',style: TextStyle(color: Colors.black),),
@@ -101,7 +95,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          textStyle: TextStyle(
+                          textStyle: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             

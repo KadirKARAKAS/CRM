@@ -15,7 +15,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
   @override
   void initState() {
     super.initState();
-    // Kullanıcıları başlatmak için
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserProvider>(context, listen: false).fetchUsers();
     });
@@ -55,11 +54,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
             return Center(child: CircularProgressIndicator());
           }
 
-          return SingleChildScrollView(  // Kaydırılabilir yapı
+          return SingleChildScrollView(  
             padding: const EdgeInsets.all(16.0),
             child: ListView.builder(
-              shrinkWrap: true,  // Yükseklik konusunda sınırlama
-              physics: NeverScrollableScrollPhysics(), // Scroll'u devre dışı bırak
+              shrinkWrap: true,  
+              physics: NeverScrollableScrollPhysics(), 
               itemCount: userProvider.users.length,
               itemBuilder: (context, index) {
                 UserModel user = userProvider.users[index];
@@ -75,7 +74,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Email ve Role bilgilerini tam sol tarafa hizaladık
                         Padding(
                           padding: const EdgeInsets.only(bottom: 4.0),
                           child: Text('Email: ${user.email}', style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w400)),
@@ -151,7 +149,7 @@ class _RoleDialogState extends State<RoleDialog> {
         width: double.maxFinite,
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Material(
-          color: Colors.white, // Saydam bir arka plan kullan
+          color: Colors.white, 
           child: InkWell(
             onTap: () {},
             child: Container(
@@ -181,15 +179,15 @@ class _RoleDialogState extends State<RoleDialog> {
                     }
                   },
                   isExpanded: true,
-                  underline: SizedBox(), // Alt çizgiyi kaldırdık
-                  iconSize: 30, // Ok simgesinin boyutunu artırdık
-                  iconEnabledColor: Colors.white, // Ok simgesinin rengi
+                  underline: SizedBox(), 
+                  iconSize: 30, 
+                  iconEnabledColor: Colors.white, 
                   style: TextStyle(
                     color: Colors.blueAccent,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
-                  items: <String>['admin', 'personel', 'user']
+                  items: <String>['admin', 'personel', 'uye']
                       .map((role) => DropdownMenuItem(
                             value: role,
                             child: Padding(

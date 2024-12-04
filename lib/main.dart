@@ -1,8 +1,8 @@
 import 'package:crm/firebase_options.dart';
 import 'package:crm/home_page.dart';
 import 'package:crm/model/user_provider.dart';
-import 'package:crm/sign_up_page.dart';
-import 'package:firebase_core/firebase_core.dart';  // Firebase başlatma için import
+import 'package:crm/sign_in_page.dart';
+import 'package:firebase_core/firebase_core.dart';  
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +19,7 @@ void main() async {
         debugShowCheckedModeBanner: false,
         initialRoute: '/login',
         routes: {
-          '/login': (context) => SignUpPage(),
+          '/login': (context) => SignInPage(),
           '/home': (context) => HomePage(),
 
     

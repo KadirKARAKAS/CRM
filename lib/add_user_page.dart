@@ -39,7 +39,7 @@ Future<void> _addUser() async {
       uid: userId,
       email: email,
       role: _selectedRole,
-    //  name: email.split('@')[0],
+     name: email.split('@')[0],
     ));
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -69,7 +69,7 @@ Future<void> _addUser() async {
           'Yeni Kullanıcı Ekle',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
         ),
-        backgroundColor: Colors.blueAccent, // Ana renk mavi tonları
+        backgroundColor: Colors.blueAccent, 
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

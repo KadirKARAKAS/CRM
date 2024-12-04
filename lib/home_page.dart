@@ -1,3 +1,4 @@
+import 'package:crm/sign_in_page.dart';
 import 'package:crm/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,10 +20,10 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
-              await FirebaseAuth.instance.signOut(); // Firebase çıkış işlemi
+              await FirebaseAuth.instance.signOut(); 
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => SignUpPage()), // Login sayfasına yönlendir
+                MaterialPageRoute(builder: (context) => SignUpPage()),
               );
             },
           )
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: user == null
-            ? CircularProgressIndicator() // Kullanıcı girişi yapılmamışsa yükleme animasyonu göster
+            ? CircularProgressIndicator()
             : Text('Hoşgeldiniz, ${user?.email ?? 'Kullanıcı'}!'),
       ),
     );

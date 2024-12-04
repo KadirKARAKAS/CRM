@@ -1,3 +1,5 @@
+import 'package:crm/sign_up_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -8,9 +10,20 @@ class PersonelPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Personel Sayfası'),
         actions: [
-          IconButton(
+           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
+              try {
+                await FirebaseAuth.instance.signOut();  
+                Navigator.pushReplacement(
+                  context, 
+                  MaterialPageRoute(builder: (context) => SignUpPage())  
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Çıkış yapılırken bir hata oluştu: $e'))
+                );
+              }
             },
           ),
         ],
