@@ -4,7 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PasswordResetPage extends StatefulWidget {
+  const PasswordResetPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _PasswordResetPageState createState() => _PasswordResetPageState();
 }
 

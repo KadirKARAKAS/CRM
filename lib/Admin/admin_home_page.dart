@@ -9,12 +9,15 @@ import 'package:crm/model/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class AdminHomePage extends StatefulWidget {
+  const AdminHomePage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _AdminHomePageState createState() => _AdminHomePageState();
 }
 
 class _AdminHomePageState extends State<AdminHomePage> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedRole = 'All';
   int _sortColumnIndex = 0;

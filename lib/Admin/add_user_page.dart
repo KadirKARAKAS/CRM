@@ -6,7 +6,10 @@ import 'package:crm/model/user_provider.dart';
 import 'package:crm/model/user_model.dart';
 
 class AddUserPage extends StatefulWidget {
+  const AddUserPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _AddUserPageState createState() => _AddUserPageState();
 }
 
@@ -23,14 +26,14 @@ class _AddUserPageState extends State<AddUserPage> {
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('E-posta adresi boş olamaz.')),
+        const SnackBar(content: Text('E-posta adresi boş olamaz.')),
       );
       return;
     }
 
     if (age.isEmpty || int.tryParse(age) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Geçerli bir yaş girin.')),
+        const SnackBar(content: Text('Geçerli bir yaş girin.')),
       );
       return;
     }
@@ -42,7 +45,7 @@ class _AddUserPageState extends State<AddUserPage> {
 
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
-        email: email, //
+        email: email,
         password: "123456",
       );
 

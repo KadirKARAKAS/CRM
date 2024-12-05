@@ -5,9 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class EditUserPage extends StatefulWidget {
   final DocumentSnapshot userDoc;
 
-  EditUserPage({required this.userDoc});
+  const EditUserPage({required this.userDoc});
 
   @override
+  // ignore: library_private_types_in_public_api
   _EditUserPageState createState() => _EditUserPageState();
 }
 

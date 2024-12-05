@@ -11,7 +11,6 @@ class MessagingServices {
     //   badge: true,
     //   sound: true,
     // );
-
   }
 
   Future<bool> isNotificationPermissionDisable() async {
@@ -29,13 +28,9 @@ class MessagingServices {
         await FirebaseMessaging.instance.getInitialMessage();
 
     if (remoteMessage != null) {
-      
-
-     
       handleNotification(remoteMessage);
-    } 
+    }
     FirebaseMessaging.onMessageOpenedApp.listen((event) async {
-
       handleNotification(event);
     });
     FirebaseMessaging.onMessage.listen((event) {
@@ -50,11 +45,8 @@ class MessagingServices {
     return await FirebaseMessaging.instance.getToken();
   }
 
-
-
   void handleNotification(RemoteMessage message) {
     final Map<String, dynamic> data = message.data;
     log("handleNotification data:$data");
-   
   }
 }

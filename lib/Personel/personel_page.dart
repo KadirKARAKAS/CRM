@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PersonelPage extends StatefulWidget {
+  const PersonelPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _PersonelPageState createState() => _PersonelPageState();
 }
 
