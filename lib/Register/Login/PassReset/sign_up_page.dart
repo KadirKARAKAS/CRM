@@ -14,6 +14,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
+  String _age = '';
   bool _isLoading = false;
 
   Future<void> _signUp() async {
@@ -35,20 +36,22 @@ class _SignUpPageState extends State<SignUpPage> {
         String? notificationToken =
             await MessagingServices().getNotificationToken();
 
+        int userAge = int.tryParse(_age) ?? 0;
+
         await FirebaseFirestore.instance.collection('users').doc(userId).set({
           'uid': userId,
           'email': _email,
           'created_at': DateTime.now(),
           'role': 'user',
-          "name": _email.split('@')[0],
-          "notificationToken": notificationToken,
-          "age": 0,
+          'name': _email.split('@')[0],
+          'notificationToken': notificationToken,
+          'age': userAge,
         });
 
         Fluttertoast.showToast(msg: 'Kayıt başarılı!');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SignInPage()),
+          MaterialPageRoute(builder: (context) => const SignInPage()),
         );
       } on FirebaseAuthException catch (e) {
         String message;
@@ -75,9 +78,9 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : Form(
                   key: _formKey,
                   child: SingleChildScrollView(
@@ -88,7 +91,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Colors.deepPurple,
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -96,11 +99,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           decoration: InputDecoration(
                             labelText: 'E-posta',
                             hintText: 'E-posta adresinizi girin',
-                            prefixIcon: Icon(Icons.email),
-                            border: OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.email,
+                                color: Colors.deepPurple),
+                            border: const OutlineInputBorder(),
                             filled: true,
                             fillColor: Colors.grey[200],
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 16),
                           ),
                           keyboardType: TextInputType.emailAddress,
@@ -115,16 +119,17 @@ class _SignUpPageState extends State<SignUpPage> {
                           },
                           onSaved: (value) => _email = value!.trim(),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Şifre',
                             hintText: 'Şifrenizi girin',
-                            prefixIcon: Icon(Icons.lock),
-                            border: OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.lock,
+                                color: Colors.deepPurple),
+                            border: const OutlineInputBorder(),
                             filled: true,
                             fillColor: Colors.grey[200],
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 16),
                           ),
                           obscureText: true,
@@ -139,19 +144,54 @@ class _SignUpPageState extends State<SignUpPage> {
                           },
                           onSaved: (value) => _password = value!.trim(),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            labelText: 'Yaş',
+                            hintText: 'Yaşınızı girin',
+                            prefixIcon: const Icon(Icons.calendar_today,
+                                color: Colors.deepPurple),
+                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 16),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Yaş boş olamaz';
+                            }
+                            if (int.tryParse(value) == null) {
+                              return 'Geçerli bir yaş girin';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) => _age = value!.trim(),
+                        ),
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: _signUp,
-                          child: Text(
-                            'Kayıt Ol',
-                            style: TextStyle(color: Colors.black),
-                          ),
                           style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, 50),
-                            backgroundColor: Colors.blueAccent,
+                            minimumSize: const Size(double.infinity, 50),
+                            backgroundColor: Colors.deepPurple,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
+                          ),
+                          child: const Text(
+                            'Kayıt Ol',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            'Zaten bir hesabınız var mı? Geri Dön!',
+                            style: TextStyle(color: Colors.deepPurple),
                           ),
                         ),
                       ],

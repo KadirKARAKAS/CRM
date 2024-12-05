@@ -54,7 +54,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin Paneli'),
+        title: Text('Admin Paneli',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
         actions: [
           IconButton(
             onPressed: () {
@@ -63,10 +65,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 MaterialPageRoute(builder: (context) => AddUserPage()),
               );
             },
-            icon: Icon(Icons.add),
+            icon: Icon(Icons.add, color: Colors.white),
           ),
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacement(
@@ -77,69 +79,90 @@ class _AdminHomePageState extends State<AdminHomePage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
               controller: _searchController,
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
-                labelText: 'Ara...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+                labelText: 'Arama yapın...',
+                prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: Colors.deepPurple),
+                        onPressed: () {
+                          setState(() {
+                            _searchQuery = '';
+                            _searchController.clear();
+                          });
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: DropdownButton<String>(
+            const SizedBox(height: 16),
+            DropdownButton<String>(
               value: _selectedRole,
               onChanged: (value) => setState(() => _selectedRole = value!),
               items: ['All', 'admin', 'personel', 'user']
                   .map((role) => DropdownMenuItem(
                         value: role,
-                        child: Text(role),
+                        child: Text(role,
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ))
                   .toList(),
               isExpanded: true,
+              style: TextStyle(color: Colors.deepPurple),
+              dropdownColor: Colors.white,
+              iconEnabledColor: Colors.deepPurple,
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: PaginatedDataTable(
-                header: Text('Kullanıcı Listesi'),
-                sortColumnIndex: _sortColumnIndex,
-                sortAscending: _ascending,
-                columns: [
-                  DataColumn(
-                    label: _buildColumnHeader('Ad', 0),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: _buildColumnHeader('Email', 1),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: _buildColumnHeader('Rol', 2),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: _buildColumnHeader('Yaş', 3),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(label: Text('İşlemler')),
-                ],
-                source: _UserDataSource(users, context, userProvider),
-                rowsPerPage: 8,
+            const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                child: PaginatedDataTable(
+                  header: Text('Kullanıcı Listesi',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  sortColumnIndex: _sortColumnIndex,
+                  sortAscending: _ascending,
+                  columns: [
+                    DataColumn(
+                      label: _buildColumnHeader('Ad', 0),
+                      onSort: (columnIndex, ascending) =>
+                          _onSort(columnIndex, ascending),
+                    ),
+                    DataColumn(
+                      label: _buildColumnHeader('Email', 1),
+                      onSort: (columnIndex, ascending) =>
+                          _onSort(columnIndex, ascending),
+                    ),
+                    DataColumn(
+                      label: _buildColumnHeader('Rol', 2),
+                      onSort: (columnIndex, ascending) =>
+                          _onSort(columnIndex, ascending),
+                    ),
+                    DataColumn(
+                      label: _buildColumnHeader('Yaş', 3),
+                      onSort: (columnIndex, ascending) =>
+                          _onSort(columnIndex, ascending),
+                    ),
+                    DataColumn(label: Text('İşlemler')),
+                  ],
+                  source: _UserDataSource(users, context, userProvider),
+                  rowsPerPage: 10,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -169,12 +192,14 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Widget _buildColumnHeader(String title, int columnIndex) {
     return Row(
       children: [
-        Text(title),
-        if (_sortColumnIndex == columnIndex)
-          Icon(
-            _ascending ? Icons.arrow_upward : Icons.arrow_downward,
-            size: 16,
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Colors.deepPurple,
           ),
+        ),
       ],
     );
   }
@@ -191,10 +216,11 @@ class _UserDataSource extends DataTableSource {
   DataRow getRow(int index) {
     final user = users[index];
     return DataRow(cells: [
-      DataCell(Text(user.name ?? '')),
-      DataCell(Text(user.email ?? '')),
-      DataCell(Text(user.role ?? '')),
-      DataCell(Text(user.age?.toString() ?? '0')),
+      DataCell(Text(user.name ?? '', style: TextStyle(fontSize: 16))),
+      DataCell(Text(user.email ?? '', style: TextStyle(fontSize: 16))),
+      DataCell(Text(user.role ?? '', style: TextStyle(fontSize: 16))),
+      DataCell(
+          Text(user.age?.toString() ?? '0', style: TextStyle(fontSize: 16))),
       DataCell(
         Row(
           children: [

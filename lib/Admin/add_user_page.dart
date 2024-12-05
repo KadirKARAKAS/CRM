@@ -13,23 +13,36 @@ class AddUserPage extends StatefulWidget {
 class _AddUserPageState extends State<AddUserPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
   String _selectedRole = 'user';
+  bool _isLoading = false;
 
   Future<void> _addUser() async {
     String email = _emailController.text.trim();
+    String age = _ageController.text.trim();
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('E-posta adresi boş olamaz.')),
       );
+      return;
+    }
 
+    if (age.isEmpty || int.tryParse(age) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Geçerli bir yaş girin.')),
+      );
       return;
     }
 
     try {
+      setState(() {
+        _isLoading = true;
+      });
+
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
-        email: email,
+        email: email, //
         password: "123456",
       );
 
@@ -39,15 +52,16 @@ class _AddUserPageState extends State<AddUserPage> {
           uid: userId,
           email: email,
           role: _selectedRole,
-          age: 0,
+          age: int.parse(age),
           name: email.split('@')[0],
           dateTime: DateTime.now()));
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kullanıcı başarıyla eklendi.')),
+        const SnackBar(content: Text('Kullanıcı başarıyla eklendi.')),
       );
 
       _emailController.clear();
+      _ageController.clear();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => AdminHomePage()),
@@ -56,20 +70,23 @@ class _AddUserPageState extends State<AddUserPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Kullanıcı eklerken hata oluştu: $e')),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Yeni Kullanıcı Ekle',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushAndRemoveUntil(
               context,
@@ -77,90 +94,113 @@ class _AddUserPageState extends State<AddUserPage> {
               (Route<dynamic> route) => false,
             );
           },
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
+        backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('E-posta adresi:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            SizedBox(height: 8),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                hintText: 'E-posta adresini girin',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Colors.blue[50],
-                contentPadding: EdgeInsets.all(14),
-              ),
-            ),
-            SizedBox(height: 16),
-            Text('Rol Seç:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blueAccent, width: 1),
-              ),
-              child: DropdownButton<String>(
-                value: _selectedRole,
-                items: ['admin', 'personel', 'user']
-                    .map((role) => DropdownMenuItem(
-                          value: role,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            child: Text(
-                              role.toUpperCase(),
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
+        padding: const EdgeInsets.all(20.0),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'E-posta adresi',
+                        labelStyle: const TextStyle(color: Colors.deepPurple),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _ageController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Yaş',
+                        labelStyle: const TextStyle(color: Colors.deepPurple),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.deepPurple, width: 1),
+                      ),
+                      child: DropdownButton<String>(
+                        value: _selectedRole,
+                        items: ['admin', 'personel', 'user']
+                            .map((role) => DropdownMenuItem(
+                                  value: role,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0),
+                                    child: Text(
+                                      role.toUpperCase(),
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRole = value!;
+                          });
+                        },
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        icon: const Icon(Icons.arrow_drop_down_circle,
+                            color: Colors.deepPurple),
+                        iconSize: 30,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepPurple),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Center(
+                      child: SizedBox(
+                        width: 125,
+                        child: ElevatedButton(
+                          onPressed: _addUser,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            textStyle: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedRole = value!;
-                  });
-                },
-                isExpanded: true,
-                underline: SizedBox(),
-                icon: Icon(Icons.arrow_drop_down_circle,
-                    color: Colors.blueAccent),
-                iconSize: 30,
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.blueAccent),
-              ),
-            ),
-            SizedBox(height: 16),
-            Center(
-              child: ElevatedButton(
-                onPressed: _addUser,
-                child: Text(
-                  'Kullanıcı Ekle',
-                  style: TextStyle(fontSize: 16),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 40),
-                  backgroundColor: Colors.blueAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                          child: const Text(
+                            'Kullanıcı Ekle',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
