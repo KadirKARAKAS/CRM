@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class EditUserPage extends StatefulWidget {
   final DocumentSnapshot userDoc;
 
-  const EditUserPage({required this.userDoc});
+  EditUserPage({required this.userDoc});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -14,8 +14,8 @@ class EditUserPage extends StatefulWidget {
 
 class _EditUserPageState extends State<EditUserPage> {
   late TextEditingController ageController;
-  late TextEditingController roleController;
   late TextEditingController nameController;
+  String _selectedRole = '';
   bool _isLoading = false;
 
   @override
@@ -23,8 +23,8 @@ class _EditUserPageState extends State<EditUserPage> {
     super.initState();
     ageController =
         TextEditingController(text: widget.userDoc['age']?.toString() ?? '');
-    roleController = TextEditingController(text: widget.userDoc['role']);
     nameController = TextEditingController(text: widget.userDoc['name']);
+    _selectedRole = widget.userDoc['role']; // Initialize the role
   }
 
   Future<void> updateUser() async {
@@ -38,7 +38,7 @@ class _EditUserPageState extends State<EditUserPage> {
           .doc(widget.userDoc.id)
           .update({
         'age': int.tryParse(ageController.text) ?? 0,
-        'role': roleController.text,
+        'role': _selectedRole,
         'name': nameController.text,
       });
 
@@ -113,16 +113,44 @@ class _EditUserPageState extends State<EditUserPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    TextField(
-                      controller: roleController,
-                      decoration: InputDecoration(
-                        labelText: 'Rol',
-                        labelStyle: const TextStyle(color: Colors.deepPurple),
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.deepPurple, width: 1),
+                      ),
+                      child: DropdownButton<String>(
+                        value: _selectedRole,
+                        items: ['admin', 'personel', 'user']
+                            .map((role) => DropdownMenuItem(
+                                  value: role,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0),
+                                    child: Text(
+                                      role.toUpperCase(),
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRole = value!;
+                          });
+                        },
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        icon: const Icon(Icons.arrow_drop_down_circle,
+                            color: Colors.deepPurple),
+                        iconSize: 30,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepPurple),
                       ),
                     ),
                     const SizedBox(height: 30),
