@@ -13,7 +13,7 @@ class AddUserPage extends StatefulWidget {
 class _AddUserPageState extends State<AddUserPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
-  String _selectedRole = 'uye';
+  String _selectedRole = 'user';
 
   Future<void> _addUser() async {
     String email = _emailController.text.trim();
@@ -36,12 +36,12 @@ class _AddUserPageState extends State<AddUserPage> {
       String userId = userCredential.user!.uid;
 
       Provider.of<UserProvider>(context, listen: false).addUser(UserModel(
-        uid: userId,
-        email: email,
-        role: _selectedRole,
-        age: 0,
-        name: email.split('@')[0],
-      ));
+          uid: userId,
+          email: email,
+          role: _selectedRole,
+          age: 0,
+          name: email.split('@')[0],
+          dateTime: DateTime.now()));
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Kullanıcı başarıyla eklendi.')),
@@ -113,7 +113,7 @@ class _AddUserPageState extends State<AddUserPage> {
               ),
               child: DropdownButton<String>(
                 value: _selectedRole,
-                items: ['admin', 'personel', 'uye']
+                items: ['admin', 'personel', 'user']
                     .map((role) => DropdownMenuItem(
                           value: role,
                           child: Padding(
